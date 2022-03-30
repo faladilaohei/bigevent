@@ -1,29 +1,8 @@
+$.ajaxPrefilter(function (options) {
+    //每次调用$.ajax $.post和$.get之前，都会自动调用这个函数
+    //这个函数可以拿到我们给ajax的配置对象,包括URL type success等
 
-// 后续，如果哪个页面需要发送ajax请求，则必须加载baseAPI.js
-$.ajaxPrefilter(function (option) {
-    // option 就是每次ajax请求时的配置对象
-
-    // console.log(option);
-    // 配置url，统一加上根路径
-    option.url = 'http://www.liulongbin.top:3007' + option.url;
-
-    // z请求的url，如果是以  /my/ 开头的，则需要进行下面两项配置
-    if (option.url.indexOf('/my/') !== -1) {
-        // 配置complete
-        // complete，当ajax请求完成之后触发（无论ajax请求成功还是失败都会触发）
-        option.complete = function (xhr) {
-            // console.log('xhr=', xhr);
-            if (xhr.responseJSON.status === 1 && xhr.responseJSON.message === '身份认证失败！') {
-                // 清除假token
-                localStorage.removeItem('token');
-                // 说明用户没有登录
-                location.href = '/login.html'
-            }
-        }
-        // 配置headers
-        option.headers = {
-            Authorization: localStorage.getItem('token')
-        }
-    }
-    
-});
+    //可以手动将根路径拼接上,简化代码
+    options.url = 'http://www.liulongbin.top:3007' + options.url
+    console.log(options.url);
+})

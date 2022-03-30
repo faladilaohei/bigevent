@@ -1,102 +1,69 @@
 $(function () {
-    // 切换登录和注册的盒子
-    $('#quzhuce').on('click', function () {
-        $('.login').hide();
-        $('.reg').show();
-    });
+    //点击“去注册”
+    $('#link_reg').on('click', () => {
+        $('.login-box').hide()
+        $('.reg-box').show()
+    })
+    //点击"去登陆"
+    $('#link_login').on('click', () => {
+        $('.reg-box').hide()
+        $('.login-box').show()
+    })
 
-    $('#qudenglu').on('click', function () {
-        $('.login').show();
-        $('.reg').hide();
-    });
-
-    // 使用layui内置模块的步骤：
-    // 1. 加载模块
-    var form = layui.form;
-
-    // 2. 使用模块
-    // 使用layui的表单验证功能
+    //从layUI中获取form对象
+    var form = layui.form
+    //导入layer方法
+    var layer = layui.layer
+    //通过form.verify方法写自定义校验规则
     form.verify({
-        // 各种自定义的验证规则
-        // 规则名称: ['验证的代码', '错误提示'],
-        // 规则名称：function () {}
-
-        pass: [/^[\S]{6,12}$/, '密码长度必须是6到12位'], // {6,12} 不要写成 {6, 12}
-
+        //数组的两个值分别代表：[正则匹配、匹配不符时的提示文字]
+        pwd: [
+            /^[\S]{6,12}$/
+            , '密码必须6到12位,且不能出现空格'
+        ],
+        //函数的方式写自定义校验规则
         repwd: function (value) {
-            // value表示当前使用该验证规则的输入框的值
-            // 先找到密码框的值
-            var pwd = $('.password').val().trim();
-            // console.log(pwd,  value);
-            // 比较当前重复密码是否和密码相同
-            if (pwd != value) {
-                // return '提示';
-                return '两次密码不一致'
-            }
+            //通过形参拿到的是确认密码框的值
+            //拿到密码框的值
+            var pwd = $('.reg-box [name=password]').val()
+            //比较两次的值是否相等
+            if (value !== pwd) return '两次密码不一致'
         }
-    });
 
+    })
 
-    // 加载弹出层模块
-    var layer = layui.layer;
+    //监听注册表单的提交事件
+    $('#form-reg').on('submit', function (e) {
+        //阻止默认提交行为
+        e.preventDefault()
+        var data = {
+            username: $('#form-reg [name=username]').val(), password: $('#form-reg [name=password]').val()
+        }
+        //发起post请求
+        $.post('/api/reguser', data, function (res) {
+            if (res.status !== 0) return layer.msg(res.message);
+            layer.msg('注册成功！');
+            $('#link_login').click()
+        })
+    })
 
-    // 完成注册功能
-    $('#reg-form').on('submit', function (e) {
-        // 阻止默认行为
-        e.preventDefault();
-        // 收集表单信息
-        var data = $(this).serialize(); // serialize是根据input的name属性获取值的
-        // console.log(data);
-        // 按照接口要求，提交数据
+    //监听登录表单的提交行为
+    $('#form-login').submit(function (e) {
+        e.preventDefault()
         $.ajax({
-            type: 'POST',
-            url: '/api/reguser',
-            data: data,
-            success: function (res) {
-                // console.log(res);
-                if (res.status === 1) {
-                    // 失败了
-                    // return alert(res.message);
-                    // 失败之后，重置表单
-                    // $('#reg-form')[0].reset(); // DOM中提供的重置表单的方法
-                    return layer.msg(res.message);
-                }
-                // 成功
-                // alert('注册成功~');
-                layer.msg('注册成功~');
-                // 触发“去登录”的单击事件
-                $('#qudenglu').click(); // 用代码的方式，模拟用户的点击行为
-            }
-        });
-    });
-
-
-    // 完成登录功能
-    $('#login-form').on('submit', function (e) {
-        e.preventDefault();
-        // 按照接口文件，收集表单的数据，然后ajax请求
-        var data = $(this).serialize();
-        // ajax请求
-        $.ajax({
-            type: 'POST',
+            type: 'post',
             url: '/api/login',
-            data: data,
+            // serialize()获取表单数据
+            data: $(this).serialize(),
             success: function (res) {
-                // 如果失败，终止程序执行，重置表单，并且提示错误信息
-                if (res.status === 1) {
-                    $('#login-form')[0].reset();
-                    return layer.msg(res.message);
-                }
-                // 登录成功了
-                // console.log(res);
-                // return;
-                // 保存token。因为下次去访问服务器的其他资源的时候，服务器需要我们带着token去
-                // localStorage.setItem('key', 'value');
-                localStorage.setItem('token', res.token);
-                layer.msg('登录成功~');
-                // 跳转到后台首页
-                location.href = '/index.html';
+                if (res.status !== 0) return layer.msg('登录失败');
+                layer.msg('登录成功!')
+                // console.log(res.token)
+                //将登录成功的token保存到本地存储里
+                localStorage.setItem('token', res.token)
+                //跳转到后台主页
+                location.href = '/index.html'
             }
-        });
-    });
-});
+        })
+    })
+})
