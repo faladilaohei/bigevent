@@ -1,7 +1,3 @@
-$(function () {
-    getUserInfo()
-})
-
 
 var layer = layui.layer
 
@@ -17,7 +13,7 @@ $('#btngoout').on('click', function () {
             layer.close(index);
         });
 })
-
+getUserInfo()
 // 获取用户的基本信息
 function getUserInfo() {
     $.ajax({
