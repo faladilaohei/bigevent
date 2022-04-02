@@ -1,4 +1,4 @@
-~
+
 // 定义一个查询的参数对象，将来请求数据的时候，
 // 需要将请求参数对象提交到服务器
 var q = {
@@ -84,3 +84,24 @@ function renderPage(total) {
         }
     })
 }
+
+//删除按钮的绑定事件
+$('tbody').on('click', '.btn-del', function () {
+    // 获取删除按钮的个数
+    var len = $('.btn-del').length
+    var id = $(this).attr('data-id')
+    layer.confirm('确认删除?', { icon: 3, title: '提示' }, function (index) {
+        $.get('/my/article/delete/' + id, function (res) {
+            if (res.status !== 0) return layer.msg('删除失败！')
+            layer.msg('删除成功！')
+            //在数据删除之后，要判断页码上是否还有数据
+            if (len === 1) {
+                // 如果 len 的值等于1，证明删除完毕之后，页面上就没有任何数据了
+                // 页码值最小必须是 1
+                q.pagenum = q.pagenum === 1 ? 1 : q.pagenum - 1
+            }
+            initTable()
+            layer.close(index)
+        })
+    })
+})

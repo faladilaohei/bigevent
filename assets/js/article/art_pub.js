@@ -1,15 +1,18 @@
-//定义加载文章分类
 
-$.get('/my/article/cates', function (res) {
-    if (res.status !== 0) return layui.layer.msg('获取文章分类失败')
-    var htmlStr = template('tpl-cate', res)
-    $('[name=cate_id]').html(htmlStr)
-    layui.form.render()
-})
 
 // 初始化富文本编辑器
 initEditor()
+initcate()
 
+//定义加载文章分类
+function initcate() {
+    $.get('/my/article/cates', function (res) {
+        if (res.status !== 0) return layui.layer.msg('获取文章分类失败')
+        var htmlStr = template('tpl-cate', res)
+        $('[name=cate_id]').html(htmlStr)
+        layui.form.render()
+    })
+}
 
 // 1. 初始化图片裁剪器
 var $image = $('#image')
@@ -51,13 +54,13 @@ $('#btnSave2').on('click', function () {
 
 
 // 为表单绑定提交行为
-$('.layui-form').submit(function (e) {
+$('#form-pub').submit(function (e) {
     //1.阻止默认行为
     e.preventDefault()
     //2.基于表单，快速创建一个FormData对象
     var fd = new FormData($(this)[0])
     //3.将状态追加到fd中
-    fd.append('status', art_state)
+    fd.append('state', art_state)
 
 
     //4.获得裁剪之后的图片文件
@@ -73,11 +76,10 @@ $('.layui-form').submit(function (e) {
         // 6. 发起 ajax 数据请求
         publishArticle(fd)
         //循环遍历拿到键值对
-        fd.forEach(function (v, k) {
-            console.log(v, k)
-        })
+        // fd.forEach(function (v, k) {
+        //     console.log(v, k)
+        // })
     })
-
 })
 
 function publishArticle(fd) {
